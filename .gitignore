@@ -1,0 +1,141 @@
+# ======================
+# Python
+# ======================
+
+# Байт-код и кэш
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальные окружения
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# Установленные пакеты
+*.egg-info/
+*.egg
+dist/
+build/
+pip-wheel-metadata/
+pip-delete-this-directory.txt
+
+# Локальные конфигурации pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ======================
+# PyCharm / IntelliJ IDEA
+# ======================
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ======================
+# ОС и редакторы
+# ======================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# Редакторы
+*.swp
+*.swo
+*.swn
+.vscode/          # VS Code (если используется параллельно)
+*.sublime-project
+*.sublime-workspace
+
+# ======================
+# Тестирование и покрытие
+# ======================
+
+# pytest
+.pytest_cache/
+pytestdebug.log
+
+# coverage.py
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.bash_history
+.python-history
+
+# nose
+.noseids
+
+# ======================
+# Jupyter
+# ======================
+
+.ipynb_checkpoints/
+*.ipynb
+
+# ======================
+# Секреты и данные
+# ======================
+
+# Конфиги и секреты
+*.env
+.env.local
+.env.*.local
+secrets.json
+config.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Логи
+*.log
+logs/
+*.log.*
+
+# Временные файлы данных
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite
+*.sqlite3
+data/
+datasets/
+downloads/
+
+# ======================
+# Docker
+# ======================
+
+.dockerenv
+.dockerinit
+docker-compose.override.yml
+
+# ======================
+# CI/CD
+# ======================
+
+# GitHub Actions
+.github/workflows/*.yml
+
+# Git
+.git
