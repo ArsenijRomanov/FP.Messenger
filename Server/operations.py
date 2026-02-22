@@ -4,7 +4,7 @@ from utils import now_ts, json_msg
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from config import logger
 from config import MAX_QUEUE_SIZE
-from database import rooms, clients
+from database import rooms, clients, unique_usernames
 
 async def send_to_ws_safe(ws, obj):
     try:
@@ -164,6 +164,10 @@ async def register_client(ws):
 async def unregister_client(ws):
     client = clients.pop(ws, None)
     if client:
+        display_name = client.get('display_name', 'unknown')
+
+        if display_name in unique_usernames:
+            del unique_usernames[display_name]
 
         for room_id in list(client['rooms']):
             await leave_room(room_id, ws, notify=True)
@@ -173,8 +177,10 @@ async def unregister_client(ws):
             writer.cancel()
             try:
                 await writer
-            except Exception:
+            except asyncio.CancelledError:
                 pass
+            except Exception as e:
+                logger.error(f"Error cancelling writer task: {e}", exc_info=True)
 
 async def client_writer(ws, outgoing_queue: asyncio.Queue):
     """Отправляет все сообщения из per-client outgoing очереди в websocket."""

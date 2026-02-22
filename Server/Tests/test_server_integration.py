@@ -1,3 +1,6 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import asyncio
 import json
@@ -5,7 +8,7 @@ import socket
 import pytest
 import websockets
 
-import server2
+import server
 
 
 async def send_json(ws, obj):
@@ -41,7 +44,7 @@ def get_free_port():
 @pytest.fixture(autouse=True)
 async def reset_server_state():
     # отменим все фоновые задачи между тестами
-    for r in list(server2.rooms.values()):
+    for r in list(server.rooms.values()):
         t = r.get("task")
         if t and not t.done():
             t.cancel()
@@ -49,7 +52,7 @@ async def reset_server_state():
                 await t
             except Exception:
                 pass
-    for c in list(server2.clients.values()):
+    for c in list(server.clients.values()):
         t = c.get("writer_task")
         if t and not t.done():
             t.cancel()
@@ -58,13 +61,13 @@ async def reset_server_state():
             except Exception:
                 pass
 
-    server2.rooms.clear()
-    server2.clients.clear()
-    server2.unique_usernames.clear()
+    server.rooms.clear()
+    server.clients.clear()
+    server.unique_usernames.clear()
 
     yield
 
-    for r in list(server2.rooms.values()):
+    for r in list(server.rooms.values()):
         t = r.get("task")
         if t and not t.done():
             t.cancel()
@@ -72,7 +75,7 @@ async def reset_server_state():
                 await t
             except Exception:
                 pass
-    for c in list(server2.clients.values()):
+    for c in list(server.clients.values()):
         t = c.get("writer_task")
         if t and not t.done():
             t.cancel()
@@ -80,20 +83,20 @@ async def reset_server_state():
                 await t
             except Exception:
                 pass
-    server2.rooms.clear()
-    server2.clients.clear()
-    server2.unique_usernames.clear()
+    server.rooms.clear()
+    server.clients.clear()
+    server.unique_usernames.clear()
 
 
 @pytest.fixture
 async def running_server():
     port = get_free_port()
-    server = await websockets.serve(server2.ws_handler, "127.0.0.1", port)
+    ws_server = await websockets.serve(server.ws_handler, "127.0.0.1", port)
     try:
         yield f"ws://127.0.0.1:{port}"
     finally:
-        server.close()
-        await server.wait_closed()
+        ws_server.close()
+        await ws_server.wait_closed()
 
 
 @pytest.mark.asyncio
@@ -212,18 +215,20 @@ async def test_e2e_disconnect_cleanup_removes_username_and_membership(running_se
 
         # подождём, пока сработает finally -> unregister_client
         def cleanup_done():
-            return "bob" not in server2.unique_usernames
+            return "bob" not in server.unique_usernames
 
         deadline = asyncio.get_running_loop().time() + 2.0
         while asyncio.get_running_loop().time() < deadline:
             if cleanup_done():
                 break
             await asyncio.sleep(0.02)
-        assert "bob" not in server2.unique_usernames
+        assert "bob" not in server.unique_usernames
 
         # bob должен быть удалён из members комнаты
-        assert all(ws for ws in server2.rooms[room_id]["members"] if server2.clients.get(ws, {}).get("display_name") != "bob")
+        assert all(ws for ws in server.rooms[room_id]["members"] if server.clients.get(ws, {}).get("display_name") != "bob")
     finally:
         await a.close()
-        if not b.closed:
+        try:
             await b.close()
+        except Exception:
+            pass
